@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Animated Stopwatch</title>
+  <style>
+    /* General Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #000000;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+
+    h1 {
+      margin-top: 40px;
+      margin-bottom: 20px;
+      font-size: 2.5rem;
+      animation: fadeInDown 1s ease;
+    }
+
+    .stopwatch {
+      font-size: 48px;
+      margin-bottom: 20px;
+      animation: pulse 2s infinite;
+    }
+
+    .buttons {
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    button {
+      background: #111;
+      color: #fff;
+      border: 2px solid #444;
+      padding: 10px 24px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background: #333;
+      border-color: #fff;
+      transform: scale(1.05);
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+      max-height: 200px;
+      overflow-y: auto;
+      width: 320px;
+    }
+
+    li {
+      background: #1a1a1a;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      border-left: 4px solid #5e60ce;
+      border-radius: 4px;
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: #0a0a0a;
+      color: #888;
+      text-align: center;
+      padding: 12px 0;
+      font-size: 14px;
+      border-top: 1px solid #222;
+    }
+
+    /* Animations */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Stopwatch</h1>
+  <div class="stopwatch" id="display">00:00:00.000</div>
+  <div class="buttons">
+    <button onclick="startStopwatch()">Start</button>
+    <button onclick="pauseStopwatch()">Pause</button>
+    <button onclick="resetStopwatch()">Reset</button>
+    <button onclick="recordLap()">Lap</button>
+  </div>
+  <ul id="laps"></ul>
+
+  <footer>
+    Made by Kanhaiya
+  </footer>
+
+  <script>
+    let startTime;
+    let elapsed = 0;
+    let interval;
+    let lastLap = 0;
+    let lapCounter = 1;
+
+    function formatTime(ms) {
+      const time = new Date(ms);
+      const h = String(time.getUTCHours()).padStart(2, '0');
+      const m = String(time.getUTCMinutes()).padStart(2, '0');
+      const s = String(time.getUTCSeconds()).padStart(2, '0');
+      const msStr = String(time.getUTCMilliseconds()).padStart(3, '0');
+      return `${h}:${m}:${s}.${msStr}`;
+    }
+
+    function updateDisplay() {
+      const now = Date.now();
+      const current = elapsed + (startTime ? now - startTime : 0);
+      document.getElementById('display').textContent = formatTime(current);
+    }
+
+    function startStopwatch() {
+      if (!interval) {
+        startTime = Date.now();
+        interval = setInterval(updateDisplay, 50);
+      }
+    }
+
+    function pauseStopwatch() {
+      if (interval) {
+        clearInterval(interval);
+        interval = null;
+        elapsed += Date.now() - startTime;
+        startTime = null;
+      }
+    }
+
+    function resetStopwatch() {
+      clearInterval(interval);
+      interval = null;
+      startTime = null;
+      elapsed = 0;
+      lastLap = 0;
+      lapCounter = 1;
+      document.getElementById('display').textContent = '00:00:00.000';
+      document.getElementById('laps').innerHTML = '';
+    }
+
+    function recordLap() {
+      if (!interval) return;
+      const now = Date.now();
+      const totalElapsed = elapsed + (now - startTime);
+      const lapTime = totalElapsed - lastLap;
+      lastLap = totalElapsed;
+
+      const lapDisplay = document.createElement('li');
+      lapDisplay.textContent = `Lap ${lapCounter++}: ${formatTime(lapTime)} (Total: ${formatTime(totalElapsed)})`;
+      document.getElementById('laps').prepend(lapDisplay);
+    }
+  </script>
+
+</body>
+</html>
